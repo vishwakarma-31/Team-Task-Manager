@@ -1,183 +1,145 @@
-# Team Task Manager
+# 🚀 Team Task Manager
 
-A production-ready full-stack task management application with JWT authentication and role-based access control.
+![Project Overview](https://img.shields.io/badge/Status-Active-success) ![License](https://img.shields.io/badge/License-MIT-blue) ![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react) ![Node.js](https://img.shields.io/badge/Backend-Node.js-339933?logo=nodedotjs) ![MongoDB](https://img.shields.io/badge/Database-MongoDB-47A248?logo=mongodb) ![Ant Design](https://img.shields.io/badge/UI-Ant%20Design-0170FE?logo=antdesign)
 
-## Live Demo
+A comprehensive, full-stack team collaboration and task management platform. Team Task Manager is built to help organizations seamlessly organize projects, assign tasks, track progress, and manage granular user permissions without the clutter.
 
-[Live URL - Vercel](https://your-app.vercel.app)
+---
 
-## Features
+## ✨ Features
 
-- **Authentication**: JWT-based secure login with access + refresh tokens
-- **Role-Based Access Control**: Admin and member roles with strict API-level enforcement
-- **Project Management**: Create, update, delete projects; manage members
-- **Task Management**: Create, assign, update status, track tasks
-- **Dashboard**: Real-time statistics, charts, overdue tracking
-- **Responsive UI**: Ant Design components with mobile support
+### 🛡️ Robust Role & Permission System
+- **Global Roles**: `System Admin` and `Member`. System admins have elevated global privileges across the app and access to the Global Admin Panel.
+- **Project-Level Roles**: `Project Owner`, `Project Admin`, and `Member`. 
+  - Complete isolation of project authority from global authority. 
+  - Project Owners and Project Admins can independently add/remove members and assign project admin rights securely.
 
-## Tech Stack
+### 📊 Comprehensive Dashboard Analytics
+- Rich, interactive visualizations using **Recharts**.
+- Live task metrics: Total, In Progress, Completed, and Overdue tasks.
+- Pie charts and Bar charts displaying task distributions by status and project.
 
-- **Frontend**: React 18, Vite, Ant Design 5, Recharts, React Router v6
-- **Backend**: Node.js, Express.js, MongoDB, Mongoose 7
-- **Authentication**: JWT (access: 15m, refresh: 7d), bcryptjs
-- **Deployment**: Vercel (frontend), Railway (backend), MongoDB Atlas
+### 🗂️ Project & Task Management
+- Create and organize unlimited projects.
+- Assign tasks to team members with explicit due dates and priorities (High, Medium, Low).
+- Advanced filtering and tracking: Filter tasks by project, assignee, status, or priority.
 
-## Architecture Overview
+### 🎨 Premium UI/UX
+- Built heavily on **Ant Design (antd)** for a sleek, enterprise-grade aesthetic.
+- **Dynamic Skeleton Loading**: Layout-accurate skeleton loaders (wireframe transitions) implemented across every single page to ensure a seamless, non-jarring user experience while data fetches in the background.
+- Intuitive navigation, interactive pop-ups, drop-downs, and color-coded status badges.
 
-```
-task-manager/
-├── backend/           # Express API server
-│   ├── config/       # DB & JWT config
-│   ├── models/       # Mongoose schemas
-│   ├── middleware/   # Auth & RBAC
-│   ├── controllers/  # Business logic
-│   ├── routes/      # API routes
-│   └── validation/   # Input validation
-└── frontend/        # React SPA
-    ├── src/
-    │   ├── components/
-    │   ├── pages/
-    │   ├── services/
-    │   └── contexts/
-    └── vercel.json
-```
+### 🔒 Security
+- Secure JWT-based Authentication.
+- Tokens are securely handled and stored in **HttpOnly cookies**, mitigating XSS vulnerabilities.
+- Backend middleware explicitly checks roles and project-level authorization before mutating data.
 
-## Getting Started
+---
+
+## 🏗️ Architecture & Tech Stack
+
+### Frontend
+- **React.js**: Core UI library.
+- **Ant Design (antd)**: For pre-built, robust UI components.
+- **Recharts**: For dashboard data visualization.
+- **React Router Dom**: For smooth SPA routing.
+- **Vite**: Ultra-fast build tool and development server.
+
+### Backend
+- **Node.js & Express.js**: Fast, scalable API routing and logic.
+- **MongoDB & Mongoose**: NoSQL Database for flexible, scalable schema architectures.
+- **JSON Web Tokens (JWT)**: For robust session handling via cookies.
+- **Bcrypt.js**: For secure password hashing.
+- **Express-Validator**: For strict API payload validation.
+
+---
+
+## ⚙️ Local Development Setup
+
+Follow these instructions to set up the project locally.
 
 ### Prerequisites
+- [Node.js](https://nodejs.org/en/) (v16+)
+- [MongoDB](https://www.mongodb.com/) (Local instance or Atlas URI)
 
-- Node.js 18+
-- MongoDB (local or Atlas)
-- npm or yarn
-
-### Backend Setup
-
+### 1. Clone the repository
 ```bash
-cd backend
-npm install
-# Set up .env variables (see below)
-npm start
+git clone https://github.com/your-username/Team-Task-Manager.git
+cd Team-Task-Manager
 ```
 
-The server runs on port 5000.
-
-### Frontend Setup
-
+### 2. Setup the Backend
+Open a terminal and navigate to the backend folder:
 ```bash
-cd frontend
+cd backend
+
+# Install dependencies
 npm install
+
+# Create environment variables
+cp .env.example .env
+```
+Ensure your `.env` file looks like this:
+```env
+PORT=5000
+MONGODB_URI=mongodb://localhost:27017/team-task-manager
+JWT_SECRET=your_super_secret_key
+NODE_ENV=development
+```
+
+Start the backend development server:
+```bash
 npm run dev
 ```
 
-The app runs on http://localhost:5173
+### 3. Setup the Frontend
+Open a new terminal and navigate to the frontend folder:
+```bash
+cd frontend
 
-## Environment Variables
+# Install dependencies
+npm install
 
-### Backend (.env)
+# Create environment variables
+cp .env.example .env
+```
+Ensure your frontend `.env` points to your local backend API:
+```env
+VITE_API_URL=http://localhost:5000/api
+```
 
-| Variable | Description | Required |
-|----------|------------|----------|
-| MONGO_URI | MongoDB connection string | Yes |
-| JWT_SECRET | Access token secret (32+ chars) | Yes |
-| JWT_REFRESH_SECRET | Refresh token secret (32+ chars) | Yes |
-| PORT | Server port (default: 5000) | No |
-| FRONTEND_URL | Frontend URL for CORS | Yes |
-| NODE_ENV | production or development | No |
+Start the frontend development server:
+```bash
+npm run dev
+```
 
-### Frontend (.env)
+The application will now be running at `http://localhost:5173`.
 
-| Variable | Description | Required |
-|----------|------------|----------|
-| VITE_API_URL | Backend API URL | Yes |
+---
 
-## API Documentation
+## 👥 Usage Guide
 
-### Auth Routes
+1. **Register/Login**: Start by registering an account. By default, newly registered users are given standard `member` roles for security purposes.
+2. **First Project**: Navigate to the Projects tab and click "Create Project". You will automatically become the `Project Owner`.
+3. **Invite Members**: Inside the project details page, invite registered users to your project.
+4. **Delegate Authority**: Use the dropdown next to a member's name to upgrade them to a `Project Admin`.
+5. **Manage Tasks**: Start creating tasks, assigning them to your team, and setting due dates!
 
-| Method | Endpoint | Access | Description |
-|--------|----------|--------|-------------|
-| POST | /api/auth/register | Public | Register new user |
-| POST | /api/auth/login | Public | Login |
-| POST | /api/auth/logout | Auth | Logout |
-| POST | /api/auth/refresh | Public | Refresh token |
+---
 
-### Project Routes
+## 🤝 Contributing
 
-| Method | Endpoint | Access | Description |
-|--------|----------|--------|-------------|
-| GET | /api/projects | Auth | Get all projects |
-| POST | /api/projects | Admin | Create project |
-| GET | /api/projects/:id | Member | Get project details |
-| PATCH | /api/projects/:id | Admin | Update project |
-| DELETE | /api/projects/:id | Admin | Delete project |
-| POST | /api/projects/:id/members | Admin | Add member |
-| DELETE | /api/projects/:id/members/:userId | Admin | Remove member |
+Contributions, issues, and feature requests are welcome! 
+Feel free to check [issues page](https://github.com/your-username/Team-Task-Manager/issues) if you want to contribute.
 
-### Task Routes
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-| Method | Endpoint | Access | Description |
-|--------|----------|--------|-------------|
-| GET | /api/tasks | Auth | Get tasks |
-| POST | /api/tasks | Admin | Create task |
-| GET | /api/tasks/:id | Member | Get task |
-| PATCH | /api/tasks/:id | Admin | Update task |
-| PATCH | /api/tasks/:id/status | Auth* | Update status |
-| DELETE | /api/tasks/:id | Admin | Delete task |
+---
 
-*Admin: any task; Member: only assigned tasks
+## 📝 License
 
-### Dashboard Routes
-
-| Method | Endpoint | Access | Description |
-|--------|----------|--------|-------------|
-| GET | /api/dashboard/stats | Auth | Get stats |
-
-## Role-Based Access Control
-
-| Action | Admin | Member |
-|--------|-------|--------|
-| Create project | ✅ | ❌ |
-| Update project | ✅ | ❌ |
-| Delete project | ✅ | ❌ |
-| Add/remove members | ✅ | ❌ |
-| Create task | ✅ | ❌ |
-| Update task details | ✅ | ❌ |
-| Delete task | ✅ | ❌ |
-| Update task status | ✅ | Own only |
-| View all projects | ✅ | Own only |
-| View all tasks | ✅ | Own only |
-| View global dashboard | ✅ | Personal |
-
-RBAC is enforced at the API middleware level. Frontend role checks are UI-only helpers.
-
-## Deployment
-
-### MongoDB Atlas
-
-1. Create free cluster at cloud.mongodb.com
-2. Create database user (username + password)
-3. Whitelist IP: 0.0.0.0/0
-4. Get connection string → MONGO_URI
-
-### Railway Backend
-
-1. Push code to GitHub
-2. Connect Railway to GitHub repo
-3. Set root: /backend
-4. Add env vars in Railway dashboard
-5. Deploy → copy Railway URL
-
-### Vercel Frontend
-
-1. Import project in Vercel
-2. Set root: /frontend
-3. Add VITE_API_URL env var
-4. Deploy
-
-## Demo Video
-
-[Link to demo video]
-
-## Screenshots
-
-(Add screenshots here)
+This project is open-source and available under the [MIT License](LICENSE).

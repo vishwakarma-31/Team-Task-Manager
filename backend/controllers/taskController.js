@@ -20,7 +20,7 @@ const createTask = async (req, res) => {
       title,
       description,
       project: projectId,
-      assignedTo,
+      assignedTo: assignedTo || null,
       status,
       priority,
       dueDate
@@ -122,7 +122,7 @@ const updateTask = async (req, res) => {
 
     if (title) task.title = title;
     if (description !== undefined) task.description = description;
-    if (assignedTo !== undefined) task.assignedTo = assignedTo;
+    if (assignedTo !== undefined) task.assignedTo = assignedTo || null;
     if (priority) task.priority = priority;
     if (dueDate !== undefined) task.dueDate = dueDate;
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Row, Col, Progress, Table, Typography, Spin, Card } from 'antd';
+import { Row, Col, Progress, Table, Typography, Spin, Card, Skeleton } from 'antd';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import StatsCard from '../components/StatsCard';
@@ -29,8 +29,51 @@ const DashboardPage = () => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-        <Spin size="large" />
+      <div style={{ padding: 24 }}>
+        <Skeleton.Input active style={{ width: 200, marginBottom: 8 }} size="large" />
+        <br />
+        <Skeleton.Input active style={{ width: 150, marginBottom: 24 }} size="small" />
+
+        <Row gutter={[16, 16]}>
+          {[1, 2, 3, 4].map(i => (
+            <Col xs={24} sm={12} md={6} key={i}>
+              <Card>
+                <Skeleton active title={false} paragraph={{ rows: 2 }} />
+              </Card>
+            </Col>
+          ))}
+        </Row>
+
+        <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
+          <Col xs={24}>
+            <Card>
+              <Skeleton.Input active style={{ width: '100%' }} />
+            </Card>
+          </Col>
+        </Row>
+
+        <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+          <Col xs={24} md={12}>
+            <Card title={<Skeleton.Input active size="small" style={{ width: 150 }} />}>
+              <div style={{ display: 'flex', justifyContent: 'center', height: 250, alignItems: 'center' }}>
+                <Skeleton.Avatar active size={200} shape="circle" />
+              </div>
+            </Card>
+          </Col>
+          <Col xs={24} md={12}>
+            <Card title={<Skeleton.Input active size="small" style={{ width: 150 }} />}>
+               <Skeleton active paragraph={{ rows: 6 }} />
+            </Card>
+          </Col>
+        </Row>
+
+        <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+          <Col xs={24}>
+            <Card title={<Skeleton.Input active size="small" style={{ width: 150 }} />}>
+              <Skeleton active paragraph={{ rows: 4 }} />
+            </Card>
+          </Col>
+        </Row>
       </div>
     );
   }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Row, Col, Button, Modal, Form, Input, message, Spin, Empty } from 'antd';
+import { Row, Col, Button, Modal, Form, Input, message, Spin, Empty, Skeleton, Card } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
@@ -45,8 +45,24 @@ const ProjectsPage = () => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-        <Spin size="large" />
+      <div style={{ padding: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
+          <Skeleton.Input active style={{ width: 200 }} size="large" />
+          <Skeleton.Button active />
+        </div>
+        <Row gutter={[16, 16]}>
+          {[1, 2, 3, 4].map(i => (
+            <Col xs={24} sm={12} md={8} lg={6} key={i}>
+              <Card>
+                <Skeleton active title paragraph={{ rows: 3 }} />
+                <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
+                  <Skeleton.Button active size="small" style={{ marginRight: 8 }} />
+                  <Skeleton.Button active size="small" />
+                </div>
+              </Card>
+            </Col>
+          ))}
+        </Row>
       </div>
     );
   }
@@ -65,7 +81,7 @@ const ProjectsPage = () => {
       {projects.length > 0 ? (
         <Row gutter={[16, 16]}>
           {projects.map(project => (
-            <Col key={project.id} xs={24} sm={12} md={8} lg={6}>
+            <Col key={project.id || project._id} xs={24} sm={12} md={8} lg={6}>
               <ProjectCard project={project} />
             </Col>
           ))}

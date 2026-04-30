@@ -25,8 +25,10 @@ const TaskCard = ({ task, onStatusChange, isAssignee }) => {
         </Space>
         <Space>
           {task.assignedTo && (
-            <Avatar size="small" icon={<UserOutlined />} />,
-            <Text type="secondary">{task.assignedTo.name}</Text>
+            <>
+              <Avatar size="small" icon={<UserOutlined />} />
+              <Text type="secondary">{task.assignedTo.name}</Text>
+            </>
           )}
           {task.dueDate && (
             <>

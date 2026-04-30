@@ -13,7 +13,7 @@ const RegisterPage = () => {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      await register(values.name, values.email, values.password, values.role);
+      await register(values.name, values.email, values.password);
       message.success('Registration successful');
       navigate('/dashboard');
     } catch (error) {
@@ -63,16 +63,7 @@ const RegisterPage = () => {
             <Input.Password />
           </Form.Item>
 
-          <Form.Item
-            label="Role"
-            name="role"
-            initialValue="member"
-          >
-            <Select>
-              <Select.Option value="admin">Admin</Select.Option>
-              <Select.Option value="member">Member</Select.Option>
-            </Select>
-          </Form.Item>
+
 
           <Form.Item>
             <Button type="primary" htmlType="submit" loading={loading} block>

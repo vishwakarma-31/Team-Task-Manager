@@ -10,6 +10,7 @@ import DashboardPage from './pages/DashboardPage';
 import ProjectsPage from './pages/ProjectsPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
 import TasksPage from './pages/TasksPage';
+import AdminPage from './pages/AdminPage';
 
 const { Content } = Layout;
 
@@ -52,6 +53,12 @@ const App = () => {
             <ProtectedRoute>
               <TasksPage />
             </ProtectedRoute>
+          } />
+          
+          <Route path="/admin" element={
+            <AdminRoute>
+              <AdminPage />
+            </AdminRoute>
           } />
           
           <Route path="*" element={<Navigate to="/dashboard" />} />

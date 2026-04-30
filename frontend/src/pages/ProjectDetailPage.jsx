@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Row, Col, Card, Typography, Button, Modal, Form, Input, Select, Avatar, List, message, Spin, Table, Tag } from 'antd';
+import { Row, Col, Card, Typography, Button, Modal, Form, Input, Select, Avatar, List, message, Spin, Table, Tag, Skeleton } from 'antd';
 import { PlusOutlined, UserDeleteOutlined } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
@@ -20,7 +20,7 @@ const ProjectDetailPage = () => {
   const [memberModalOpen, setMemberModalOpen] = useState(false);
   const [creatingTask, setCreatingTask] = useState(false);
   const [addingMember, setAddingMember] = useState(false);
-  const [projects, setProjects] = useState([]);
+  const [users, setUsers] = useState([]);
   const [taskForm] = Form.useForm();
   const [memberForm] = Form.useForm();
   const [statusFilter, setStatusFilter] = useState(null);
@@ -28,7 +28,7 @@ const ProjectDetailPage = () => {
 
   useEffect(() => {
     fetchProject();
-    fetchAllProjects();
+    fetchAllUsers();
   }, [id]);
 
   const fetchProject = async () => {
@@ -44,10 +44,10 @@ const ProjectDetailPage = () => {
     }
   };
 
-  const fetchAllProjects = async () => {
+  const fetchAllUsers = async () => {
     try {
-      const response = await api.get('/projects');
-      setProjects(response.data);
+      const response = await api.get('/users');
+      setUsers(response.data);
     } catch (error) {
       // Ignore
     }
@@ -93,6 +93,16 @@ const ProjectDetailPage = () => {
     }
   };
 
+  const handleUpdateMemberRole = async (userId, role) => {
+    try {
+      await api.patch(`/projects/${id}/members/${userId}/role`, { role });
+      message.success('Role updated');
+      fetchProject();
+    } catch (error) {
+      message.error(error.response?.data?.error || 'Failed to update member role');
+    }
+  };
+
   const handleStatusChange = async (taskId, newStatus) => {
     try {
       await api.patch(`/tasks/${taskId}/status`, { status: newStatus });
@@ -111,8 +121,44 @@ const ProjectDetailPage = () => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-        <Spin size="large" />
+      <div style={{ padding: 24 }}>
+        <Card style={{ marginBottom: 24 }}>
+          <Skeleton active title paragraph={{ rows: 1 }} />
+        </Card>
+        
+        <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+          <Col xs={24} md={12}>
+            <Card title={<Skeleton.Input active size="small" style={{ width: 100 }} />}>
+              <List
+                dataSource={[1, 2, 3]}
+                renderItem={() => (
+                  <List.Item>
+                    <Skeleton avatar active title={false} paragraph={{ rows: 1 }} />
+                  </List.Item>
+                )}
+              />
+            </Card>
+          </Col>
+        </Row>
+
+        <Card 
+          title={<Skeleton.Input active size="small" style={{ width: 100 }} />}
+          extra={<Skeleton.Button active />}
+        >
+          <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
+            <Skeleton.Input active style={{ width: 150 }} size="small" />
+            <Skeleton.Input active style={{ width: 150 }} size="small" />
+          </div>
+          <Row gutter={[16, 16]}>
+            {[1, 2, 3].map(i => (
+              <Col key={i} xs={24} sm={12} md={8}>
+                <Card>
+                  <Skeleton active title paragraph={{ rows: 2 }} />
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        </Card>
       </div>
     );
   }
@@ -132,24 +178,51 @@ const ProjectDetailPage = () => {
           <Card title="Members">
             <List
               dataSource={project?.members || []}
-              renderItem={member => (
-                <List.Item
-                  actions={user?.role === 'admin' && member._id !== project?.createdBy?._id ? [
-                    <Button
-                      type="text"
-                      danger
-                      icon={<UserDeleteOutlined />}
-                      onClick={() => handleRemoveMember(member._id)}
+              renderItem={member => {
+                const isProjectAdmin = project?.projectAdmins?.some(a => (a._id || a.id) === (member._id || member.id)) || (member._id === project?.createdBy?._id);
+                const currentUserIsProjectAdmin = project?.projectAdmins?.some(a => (a._id || a.id) === user?.id) || user?.role === 'admin';
+                const canManageRoles = currentUserIsProjectAdmin && member._id !== project?.createdBy?._id;
+
+                return (
+                  <List.Item
+                    actions={canManageRoles ? [
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Select 
+                          value={isProjectAdmin ? 'admin' : 'member'}
+                          size="small"
+                          onChange={(val) => handleUpdateMemberRole(member._id, val)}
+                          style={{ width: 130 }}
+                        >
+                          <Select.Option value="member">Member</Select.Option>
+                          <Select.Option value="admin">Project Admin</Select.Option>
+                        </Select>
+                        <Button
+                          type="text"
+                          danger
+                          icon={<UserDeleteOutlined />}
+                          onClick={() => handleRemoveMember(member._id)}
+                        />
+                      </div>
+                    ] : []}
+                  >
+                    <List.Item.Meta
+                      avatar={<Avatar>{member.name?.charAt(0).toUpperCase()}</Avatar>}
+                      title={
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          {member.name}
+                          {member._id === project?.createdBy?._id && (
+                            <Tag color="purple" style={{ margin: 0 }}>Project Owner</Tag>
+                          )}
+                          {isProjectAdmin && member._id !== project?.createdBy?._id && (
+                            <Tag color="volcano" style={{ margin: 0 }}>Project Admin</Tag>
+                          )}
+                        </div>
+                      }
+                      description={member.email}
                     />
-                  ] : []}
-                >
-                  <List.Item.Meta
-                    avatar={<Avatar>{member.name?.charAt(0).toUpperCase()}</Avatar>}
-                    title={member.name}
-                    description={member.email}
-                  />
-                </List.Item>
-              )}
+                  </List.Item>
+                );
+              }}
             />
             {user?.role === 'admin' && (
               <Button type="dashed" block onClick={() => setMemberModalOpen(true)}>
@@ -234,7 +307,7 @@ const ProjectDetailPage = () => {
           <Form.Item label="Assigned To" name="assignedTo">
             <Select allowClear placeholder="Select user">
               {project?.members?.map(member => (
-                <Select.Option key={member._id} value={member._id}>
+                <Select.Option key={member._id || member.id} value={member._id || member.id}>
                   {member.name}
                 </Select.Option>
               ))}
@@ -274,12 +347,10 @@ const ProjectDetailPage = () => {
             rules={[{ required: true, message: 'Please select a user!' }]}
           >
             <Select placeholder="Select user">
-              {projects
-                .flatMap(p => p.members || [])
-                .filter((m, i, arr) => arr.findIndex(x => x._id === m._id) === i)
-                .filter(m => !project?.members?.some(em => em._id === m._id))
+              {users
+                .filter(m => !project?.members?.some(em => (em._id || em.id) === (m._id || m.id)))
                 .map(member => (
-                  <Select.Option key={member._id} value={member._id}>
+                  <Select.Option key={member.id || member._id} value={member.id || member._id}>
                     {member.name} ({member.email})
                   </Select.Option>
                 ))}

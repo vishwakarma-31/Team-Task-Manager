@@ -9,14 +9,14 @@ const register = async (req, res) => {
       return res.status(400).json({ error: 'Validation failed', details: errors.array() });
     }
 
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ error: 'Email already registered' });
     }
 
-    const user = await User.create({ name, email, password, role });
+    const user = await User.create({ name, email, password });
 
     const accessToken = signAccessToken(user);
     const refreshToken = signRefreshToken(user);
@@ -102,7 +102,7 @@ const refreshToken = async (req, res) => {
     }
 
     const accessToken = signAccessToken(user);
-    res.json({ accessToken });
+    res.json({ accessToken, user: user.toJSON() });
   } catch (error) {
     console.error('Refresh token error:', error);
     res.status(401).json({ error: 'Invalid or expired refresh token' });

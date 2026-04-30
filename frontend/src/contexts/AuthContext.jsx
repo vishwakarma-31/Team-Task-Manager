@@ -18,20 +18,14 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const savedUser = localStorage.getItem('user');
-      
       // Attempt silent refresh
       const response = await api.post('/auth/refresh');
-      const { accessToken } = response.data;
+      const { accessToken, user: refreshUser } = response.data;
       
       setToken(accessToken);
-      
-      if (savedUser) {
-        setUser(JSON.parse(savedUser));
-      }
+      setUser(refreshUser);
     } catch (e) {
       clearToken();
-      localStorage.removeItem('user');
       setUser(null);
     } finally {
       setLoading(false);
@@ -44,7 +38,6 @@ export const AuthProvider = ({ children }) => {
 
     const handleUnauthorized = () => {
       clearToken();
-      localStorage.removeItem('user');
       setUser(null);
     };
 
@@ -59,18 +52,16 @@ export const AuthProvider = ({ children }) => {
     const { user, accessToken } = response.data;
     
     setToken(accessToken);
-    localStorage.setItem('user', JSON.stringify(user));
     setUser(user);
     
     return user;
   };
 
-  const register = async (name, email, password, role) => {
-    const response = await api.post('/auth/register', { name, email, password, role });
+  const register = async (name, email, password) => {
+    const response = await api.post('/auth/register', { name, email, password });
     const { user, accessToken } = response.data;
     
     setToken(accessToken);
-    localStorage.setItem('user', JSON.stringify(user));
     setUser(user);
     
     return user;
@@ -83,13 +74,11 @@ export const AuthProvider = ({ children }) => {
       // Ignore logout errors
     }
     clearToken();
-    localStorage.removeItem('user');
     setUser(null);
   };
 
   const updateUser = (updatedUser) => {
     setUser(updatedUser);
-    localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
   if (!initialLoadDone) {

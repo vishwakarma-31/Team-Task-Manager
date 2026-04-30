@@ -19,7 +19,7 @@ const taskValidation = {
       .isMongoId()
       .withMessage('Invalid project ID'),
     body('assignedTo')
-      .optional()
+      .optional({ checkFalsy: true })
       .isMongoId()
       .withMessage('Invalid assigned user ID'),
     body('status')
@@ -49,7 +49,7 @@ const taskValidation = {
       .isLength({ max: 2000 })
       .withMessage('Description must be at most 2000 characters'),
     body('assignedTo')
-      .optional()
+      .optional({ checkFalsy: true })
       .isMongoId()
       .withMessage('Invalid assigned user ID'),
     body('priority')

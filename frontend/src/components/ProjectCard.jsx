@@ -6,14 +6,14 @@ const { Text, Title } = Typography;
 
 const ProjectCard = ({ project }) => {
   return (
-    <Link to={`/projects/${project.id}`}>
+    <Link to={`/projects/${project.id || project._id}`}>
       <Card hoverable style={{ height: '100%' }}>
         <Title level={4}>{project.name}</Title>
         <Text type="secondary">{project.description || 'No description'}</Text>
         <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
           <Avatar.Group maxCount={3}>
             {(project.members || []).map((member, index) => (
-              <Avatar key={index} style={{ backgroundColor: '#1890ff' }}>
+              <Avatar key={index || member.id || member._id} style={{ backgroundColor: '#1890ff' }}>
                 {member.name?.charAt(0).toUpperCase()}
               </Avatar>
             ))}

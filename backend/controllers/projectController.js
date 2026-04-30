@@ -17,7 +17,8 @@ const createProject = async (req, res) => {
       name,
       description,
       createdBy: req.user._id,
-      members: [req.user._id]
+      members: [req.user._id],
+      projectAdmins: [req.user._id]
     });
 
     res.status(201).json({ project });
@@ -36,8 +37,9 @@ const getProjects = async (req, res) => {
     }
 
     const projects = await Project.find(query)
-      .populate('createdBy', 'name email')
-      .populate('members', 'name email')
+      .populate('createdBy', 'name email role')
+      .populate('members', 'name email role')
+      .populate('projectAdmins', 'name email role')
       .lean();
 
     const projectsWithTaskCount = await Promise.all(
@@ -57,8 +59,9 @@ const getProjects = async (req, res) => {
 const getProjectById = async (req, res) => {
   try {
     const project = await Project.findById(req.params.id)
-      .populate('createdBy', 'name email')
-      .populate('members', 'name email')
+      .populate('createdBy', 'name email role')
+      .populate('members', 'name email role')
+      .populate('projectAdmins', 'name email role')
       .lean();
 
     if (!project) {
@@ -91,6 +94,12 @@ const updateProject = async (req, res) => {
       return res.status(404).json({ error: 'Project not found' });
     }
 
+    const isGlobalAdmin = req.user.role === 'admin';
+    const isProjectAdmin = project.projectAdmins.includes(req.user._id);
+    if (!isGlobalAdmin && !isProjectAdmin && project.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: 'Not authorized to update project' });
+    }
+
     const { name, description } = req.body;
 
     if (name) project.name = name;
@@ -99,8 +108,9 @@ const updateProject = async (req, res) => {
     await project.save();
 
     const updated = await Project.findById(project._id)
-      .populate('createdBy', 'name email')
-      .populate('members', 'name email')
+      .populate('createdBy', 'name email role')
+      .populate('members', 'name email role')
+      .populate('projectAdmins', 'name email role')
       .lean();
 
     res.json({ project: updated });
@@ -116,6 +126,11 @@ const deleteProject = async (req, res) => {
 
     if (!project) {
       return res.status(404).json({ error: 'Project not found' });
+    }
+
+    const isGlobalAdmin = req.user.role === 'admin';
+    if (!isGlobalAdmin && project.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: 'Only project owner or system admin can delete project' });
     }
 
     await Task.deleteMany({ project: req.params.id });
@@ -141,6 +156,12 @@ const addMember = async (req, res) => {
       return res.status(404).json({ error: 'Project not found' });
     }
 
+    const isGlobalAdmin = req.user.role === 'admin';
+    const isProjectAdmin = project.projectAdmins.includes(req.user._id);
+    if (!isGlobalAdmin && !isProjectAdmin && project.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: 'Not authorized to add members' });
+    }
+
     const { userId } = req.body;
 
     const user = await User.findById(userId);
@@ -156,8 +177,9 @@ const addMember = async (req, res) => {
     await project.save();
 
     const updated = await Project.findById(project._id)
-      .populate('createdBy', 'name email')
-      .populate('members', 'name email')
+      .populate('createdBy', 'name email role')
+      .populate('members', 'name email role')
+      .populate('projectAdmins', 'name email role')
       .lean();
 
     res.json({ project: updated });
@@ -175,6 +197,12 @@ const removeMember = async (req, res) => {
       return res.status(404).json({ error: 'Project not found' });
     }
 
+    const isGlobalAdmin = req.user.role === 'admin';
+    const isProjectAdmin = project.projectAdmins.includes(req.user._id);
+    if (!isGlobalAdmin && !isProjectAdmin && project.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: 'Not authorized to remove members' });
+    }
+
     const { userId } = req.params;
 
     if (project.createdBy.toString() === userId) {
@@ -184,18 +212,57 @@ const removeMember = async (req, res) => {
     project.members = project.members.filter(
       member => member.toString() !== userId
     );
+    project.projectAdmins = project.projectAdmins.filter(
+      admin => admin.toString() !== userId
+    );
 
     await project.save();
 
     const updated = await Project.findById(project._id)
-      .populate('createdBy', 'name email')
-      .populate('members', 'name email')
+      .populate('createdBy', 'name email role')
+      .populate('members', 'name email role')
+      .populate('projectAdmins', 'name email role')
       .lean();
 
     res.json({ project: updated });
   } catch (error) {
     console.error('Remove member error:', error);
     res.status(500).json({ error: 'Failed to remove member' });
+  }
+};
+
+const updateMemberRole = async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    if (!project) return res.status(404).json({ error: 'Project not found' });
+    
+    const isGlobalAdmin = req.user.role === 'admin';
+    const isProjectAdmin = project.projectAdmins.includes(req.user._id);
+    if (!isGlobalAdmin && !isProjectAdmin && project.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: 'Not authorized to change project roles' });
+    }
+
+    const { role } = req.body;
+    const { userId } = req.params;
+
+    if (role === 'admin') {
+      if (!project.projectAdmins.includes(userId)) {
+        project.projectAdmins.push(userId);
+      }
+    } else {
+      project.projectAdmins = project.projectAdmins.filter(id => id.toString() !== userId);
+    }
+
+    await project.save();
+
+    const updated = await Project.findById(project._id)
+      .populate('createdBy', 'name email role')
+      .populate('members', 'name email role')
+      .populate('projectAdmins', 'name email role')
+      .lean();
+    res.json({ project: updated });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update member role' });
   }
 };
 
@@ -206,5 +273,6 @@ module.exports = {
   updateProject,
   deleteProject,
   addMember,
-  removeMember
+  removeMember,
+  updateMemberRole
 };

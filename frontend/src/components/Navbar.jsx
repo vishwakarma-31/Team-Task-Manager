@@ -1,7 +1,7 @@
-import { Layout, Menu, Button, Avatar, Dropdown, Typography } from 'antd';
+import { Layout, Menu, Button, Avatar, Dropdown, Typography, Tag } from 'antd';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { UserOutlined, LogoutOutlined, DashboardOutlined, ProjectOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { UserOutlined, LogoutOutlined, DashboardOutlined, ProjectOutlined, UnorderedListOutlined, SettingOutlined } from '@ant-design/icons';
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -34,6 +34,14 @@ const Navbar = () => {
     }
   ];
 
+  if (user?.role === 'admin') {
+    menuItems.push({
+      key: '/admin',
+      icon: <SettingOutlined />,
+      label: <Link to="/admin">Admin</Link>
+    });
+  }
+
   const userMenuItems = [
     {
       key: 'logout',
@@ -48,6 +56,7 @@ const Navbar = () => {
     if (path.startsWith('/projects')) return '/projects';
     if (path.startsWith('/tasks')) return '/tasks';
     if (path.startsWith('/dashboard')) return '/dashboard';
+    if (path.startsWith('/admin')) return '/admin';
     return '';
   };
 

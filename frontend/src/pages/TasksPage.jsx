@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Row, Col, Select, Card, Table, Tag, Typography, Spin, message, Button, Space } from 'antd';
+import { Row, Col, Select, Card, Table, Tag, Typography, Spin, message, Button, Space, Skeleton } from 'antd';
 import { FilterOutlined } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
@@ -28,7 +28,7 @@ const TasksPage = () => {
       if (statusFilter) params.append('status', statusFilter);
       if (projectFilter) params.append('projectId', projectFilter);
       if (priorityFilter) params.append('priority', priorityFilter);
-      if (assignedToMe) params.append('assignedTo', user?._id);
+      if (assignedToMe) params.append('assignedTo', user?.id);
 
       const response = await api.get(`/tasks?${params.toString()}`);
       setTasks(response.data);
@@ -63,7 +63,7 @@ const TasksPage = () => {
   };
 
   const isTaskAssignee = (task) => {
-    return task.assignedTo?._id === user?._id || user?.role === 'admin';
+    return task.assignedTo?._id === user?.id || task.assignedTo?.id === user?.id || user?.role === 'admin';
   };
 
   const columns = [
@@ -118,8 +118,19 @@ const TasksPage = () => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-        <Spin size="large" />
+      <div style={{ padding: 24 }}>
+        <Skeleton.Input active style={{ width: 200, marginBottom: 24 }} size="large" />
+        <Card style={{ marginBottom: 16 }}>
+          <Space wrap>
+            <Skeleton.Input active style={{ width: 150 }} />
+            <Skeleton.Input active style={{ width: 200 }} />
+            <Skeleton.Input active style={{ width: 150 }} />
+            <Skeleton.Button active />
+          </Space>
+        </Card>
+        <Card>
+           <Skeleton active paragraph={{ rows: 8 }} />
+        </Card>
       </div>
     );
   }
