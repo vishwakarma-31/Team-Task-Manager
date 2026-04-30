@@ -9,14 +9,14 @@ const register = async (req, res) => {
       return res.status(400).json({ error: 'Validation failed', details: errors.array() });
     }
 
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ error: 'Email already registered' });
     }
 
-    const user = await User.create({ name, email, password });
+    const user = await User.create({ name, email, password, role: role || 'member' });
 
     const accessToken = signAccessToken(user);
     const refreshToken = signRefreshToken(user);
