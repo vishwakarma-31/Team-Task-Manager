@@ -30,11 +30,9 @@ const createProject = async (req, res) => {
 
 const getProjects = async (req, res) => {
   try {
-    let query = {};
-
-    if (req.user.role !== 'admin') {
-      query.members = req.user._id;
-    }
+    // Always scope to projects the user is a member of.
+    // System admins see all projects only in the Admin Panel (separate endpoint).
+    const query = { members: req.user._id };
 
     const projects = await Project.find(query)
       .populate('createdBy', 'name email role')
