@@ -119,6 +119,12 @@ const ProjectDetailPage = () => {
     return true;
   });
 
+  const availableUsersToAdd = users.filter(m => {
+    const isAlreadyMember = project?.members?.some(em => (em._id || em.id) === (m._id || m.id));
+    const isCurrentUser = (m._id || m.id) === (user?.id || user?._id);
+    return !isAlreadyMember && !isCurrentUser;
+  });
+
   if (loading) {
     return (
       <div style={{ padding: 24 }}>
@@ -224,7 +230,7 @@ const ProjectDetailPage = () => {
                 );
               }}
             />
-            {user?.role === 'admin' && (
+            {user?.role === 'admin' && availableUsersToAdd.length > 0 && (
               <Button type="dashed" block onClick={() => setMemberModalOpen(true)}>
                 Add Member
               </Button>
@@ -347,9 +353,7 @@ const ProjectDetailPage = () => {
             rules={[{ required: true, message: 'Please select a user!' }]}
           >
             <Select placeholder="Select user">
-              {users
-                .filter(m => !project?.members?.some(em => (em._id || em.id) === (m._id || m.id)))
-                .map(member => (
+              {availableUsersToAdd.map(member => (
                   <Select.Option key={member.id || member._id} value={member.id || member._id}>
                     {member.name} ({member.email})
                   </Select.Option>
