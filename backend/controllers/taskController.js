@@ -44,11 +44,13 @@ const getTasks = async (req, res) => {
 
     let query = {};
 
-    if (req.user.role !== 'admin') {
-      const userProjects = await Project.find({ members: req.user._id }).select('_id').lean();
-      const projectIds = userProjects.map(p => p._id);
-      query.project = { $in: projectIds };
-    } else if (projectId) {
+    // Always scope tasks to the user's own projects.
+    const userProjects = await Project.find({ members: req.user._id }).select('_id').lean();
+    const projectIds = userProjects.map(p => p._id);
+    query.project = { $in: projectIds };
+
+    // Allow further filtering by a specific project
+    if (projectId) {
       query.project = projectId;
     }
 

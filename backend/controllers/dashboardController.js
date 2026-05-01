@@ -3,13 +3,10 @@ const Project = require('../models/Project');
 
 const getDashboardStats = async (req, res) => {
   try {
-    let projectFilter = {};
-
-    if (req.user.role !== 'admin') {
-      const userProjects = await Project.find({ members: req.user._id }).select('_id').lean();
-      const projectIds = userProjects.map(p => p._id);
-      projectFilter = { project: { $in: projectIds } };
-    }
+    // Always scope to the current user's projects for a personal dashboard.
+    const userProjects = await Project.find({ members: req.user._id }).select('_id').lean();
+    const projectIds = userProjects.map(p => p._id);
+    const projectFilter = { project: { $in: projectIds } };
 
     const now = new Date();
 
