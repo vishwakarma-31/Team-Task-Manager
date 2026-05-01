@@ -39,8 +39,8 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-// Handle preflight requests for all routes
-app.options('*', cors(corsOptions));
+// Handle preflight requests for all routes (Express v5 requires named wildcard)
+app.options('/{*path}', cors(corsOptions));
 
 app.use(express.json());
 app.use(morgan('dev'));
